@@ -35,7 +35,8 @@ app.use('/api/users', authMiddleware, usersRouter)
 app.use('/health', (req, res) => {
   res.status(200).json({
     success: true,
-    message: 'API is running'
+    message: 'API is running',
+    mode: process.env.NODE_ENV,
   })
 })
 

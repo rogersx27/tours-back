@@ -28,15 +28,16 @@ async function startServer() {
     const server = app.listen(port, () => {
       logger.info(`Server is running on port ${port}`)
       logger.info(`Environment: ${config.NODE_ENV}`)
+      logger.info(`API URL: ${config.NODE_ENV === 'production' ? config.API_PRODUCTION_URL : config.API_URL}`)
     })
 
     // Graceful shutdown
     const gracefulShutdown = async () => {
       logger.info('SIGTERM received. Starting graceful shutdown...')
-      
+
       server.close(async () => {
         logger.info('HTTP server closed')
-        
+
         try {
           await prisma.$disconnect()
           logger.info('Database connections closed')
