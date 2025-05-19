@@ -32,6 +32,13 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/api/auth', authRouter)
 app.use('/api/users', authMiddleware, usersRouter)
 
+app.use('/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'API is running'
+  })
+})
+
 // Error handling
 app.use(errorMiddleware)
 
