@@ -13,22 +13,17 @@ import {
     JWTPayload,
     UpdatePasswordDto
 } from './auth.types'
+import { jwtUtils } from '../../shared/utils/jwt.utils'
 
 export const authService = {
     // Generate JWT token
     generateToken(payload: Omit<JWTPayload, 'iat' | 'exp'>): string {
-        return jwt.sign(payload, config.JWT_SECRET, {
-            expiresIn: config.JWT_EXPIRES_IN,
-        })
+        return jwtUtils.sign(payload)
     },
 
     // Verify JWT token
     verifyToken(token: string): JWTPayload {
-        try {
-            return jwt.verify(token, config.JWT_SECRET) as JWTPayload
-        } catch (error) {
-            throw new AppError('Invalid or expired token', 401)
-        }
+        return jwtUtils.verify(token)
     },
 
     // Register new user
