@@ -2,7 +2,6 @@
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { prisma } from '../../lib/prisma'
-import config from '../../config/env'
 import { AppError } from '../../shared/middleware/error.middleware'
 import { Role, User } from '@prisma/client'
 import {
@@ -13,17 +12,24 @@ import {
     JWTPayload,
     UpdatePasswordDto
 } from './auth.types'
-import { jwtUtils } from '../../shared/utils/jwt.utils'
+import { jwtUtils } from '../../shared/utils/jwt'
+import config from '../../config/env'
 
 export const authService = {
     // Generate JWT token
     generateToken(payload: Omit<JWTPayload, 'iat' | 'exp'>): string {
-        return jwtUtils.sign(payload)
+        return jwt.sign(payload, config.JWT_SECRET as jwt.Secret, {
+            expiresIn: config.JWT_EXPIRES_IN,
+        })
     },
 
     // Verify JWT token
     verifyToken(token: string): JWTPayload {
-        return jwtUtils.verify(token)
+        try {
+            return jwt.verify(token, config.JWT_SECRET as jwt.Secret) as JWTPayload
+        } catch (error) {
+            throw new AppError('Invalid or expired token', 401)
+        }
     },
 
     // Register new user
