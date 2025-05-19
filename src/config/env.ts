@@ -14,12 +14,6 @@ const config = {
   JWT_SECRET: process.env.JWT_SECRET || 'your-secret-key',
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '24h',
   
-  // Web3
-  AVALANCHE_RPC_URL: process.env.AVALANCHE_RPC_URL!,
-  CONTRACT_ADDRESS: process.env.CONTRACT_ADDRESS,
-  
-  // Platform settings
-  PLATFORM_FEE_PERCENTAGE: 0.01, // 1%
 } as const
 
 // Validate required environment variables
