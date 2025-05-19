@@ -1,8 +1,9 @@
 // src/entities/users/users.controller.ts
 import { Request, Response } from 'express'
 import { usersService } from './users.service'
-// import { reservationsService } from '../reservations/reservations.service'
+import { reservationsService } from '../reservations/reservations.service'
 import { AppError } from '../../shared/middleware/error.middleware'
+import { responseHelper } from '../../shared/utils/response'
 import {
     CreateUserDto,
     UpdateUserDto,
@@ -21,12 +22,12 @@ export const usersController = {
 
         // Validate required fields
         if (!userData.email || !userData.name || !userData.password) {
-            throw new AppError('Email, name and password are required', 400)
+            return responseHelper.badRequest(res, 'Email, name and password are required')
         }
 
         // Validate email format
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) {
-            throw new AppError('Invalid email format', 400)
+            return responseHelper.badRequest(res, 'Invalid email format')
         }
 
         try {
@@ -35,14 +36,10 @@ export const usersController = {
             // Remove sensitive data from response
             const { password, ...userResponse } = user as any
 
-            res.status(201).json({
-                success: true,
-                data: userResponse,
-                message: 'User registered successfully'
-            })
+            return responseHelper.created(res, userResponse, 'User registered successfully')
         } catch (error: any) {
             if (error.code === 'P2002') {
-                throw new AppError('Email already exists', 400)
+                return responseHelper.badRequest(res, 'Email already exists')
             }
             throw error
         }
@@ -53,7 +50,7 @@ export const usersController = {
         const userId = req.user?.id
 
         if (!userId) {
-            throw new AppError('User not authenticated', 401)
+            return responseHelper.unauthorized(res, 'User not authenticated')
         }
 
         // Get different profile data based on user role
@@ -62,13 +59,10 @@ export const usersController = {
             : await usersService.getUserProfile(userId)
 
         if (!user) {
-            throw new AppError('User not found', 404)
+            return responseHelper.notFound(res, 'User not found')
         }
 
-        res.status(200).json({
-            success: true,
-            data: user
-        })
+        return responseHelper.success(res, user)
     },
 
     // Update user profile
@@ -77,25 +71,21 @@ export const usersController = {
         const updateData: UpdateUserDto = req.body
 
         if (!userId) {
-            throw new AppError('User not authenticated', 401)
+            return responseHelper.unauthorized(res, 'User not authenticated')
         }
 
         // Basic validation
         if (updateData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(updateData.email)) {
-            throw new AppError('Invalid email format', 400)
+            return responseHelper.badRequest(res, 'Invalid email format')
         }
 
         try {
             const updatedUser = await usersService.updateProfile(userId, updateData)
 
-            res.status(200).json({
-                success: true,
-                data: updatedUser,
-                message: 'Profile updated successfully'
-            })
+            return responseHelper.success(res, updatedUser, 'Profile updated successfully')
         } catch (error: any) {
             if (error.code === 'P2002') {
-                throw new AppError('Email already exists', 400)
+                return responseHelper.badRequest(res, 'Email already exists')
             }
             throw error
         }
@@ -107,28 +97,25 @@ export const usersController = {
         const passwordData: UpdatePasswordDto = req.body
 
         if (!userId) {
-            throw new AppError('User not authenticated', 401)
+            return responseHelper.unauthorized(res, 'User not authenticated')
         }
 
         // Validate password data
         if (!passwordData.currentPassword || !passwordData.newPassword) {
-            throw new AppError('Current password and new password are required', 400)
+            return responseHelper.badRequest(res, 'Current password and new password are required')
         }
 
         // Validate password strength
         if (passwordData.newPassword.length < 8) {
-            throw new AppError('New password must be at least 8 characters long', 400)
+            return responseHelper.badRequest(res, 'New password must be at least 8 characters long')
         }
 
         try {
             await usersService.updatePassword(userId, passwordData)
 
-            res.status(200).json({
-                success: true,
-                message: 'Password updated successfully'
-            })
+            return responseHelper.success(res, null, 'Password updated successfully')
         } catch (error: any) {
-            throw new AppError(error.message, 400)
+            return responseHelper.badRequest(res, error.message)
         }
     },
 
@@ -137,16 +124,13 @@ export const usersController = {
         const userId = req.user?.id
 
         if (!userId) {
-            throw new AppError('User not authenticated', 401)
+            return responseHelper.unauthorized(res, 'User not authenticated')
         }
 
         try {
-            // const reservations = await reservationsService.getUserReservations(userId)
+            const reservations = await reservationsService.getUserReservations(userId)
 
-            res.status(200).json({
-                success: true,
-                data: "reservations"
-            })
+            return responseHelper.success(res, reservations)
         } catch (error: any) {
             throw error
         }
@@ -158,20 +142,16 @@ export const usersController = {
 
         // Validate required fields
         if (!userData.email || !userData.name || !userData.password) {
-            throw new AppError('Email, name and password are required', 400)
+            return responseHelper.badRequest(res, 'Email, name and password are required')
         }
 
         try {
             const user = await usersService.createUser(userData)
 
-            res.status(201).json({
-                success: true,
-                data: user,
-                message: 'User created successfully'
-            })
+            return responseHelper.created(res, user, 'User created successfully')
         } catch (error: any) {
             if (error.code === 'P2002') {
-                throw new AppError('Email already exists', 400)
+                return responseHelper.badRequest(res, 'Email already exists')
             }
             throw error
         }
@@ -190,9 +170,8 @@ export const usersController = {
 
         const users = await usersService.getAllUsers(filter)
 
-        res.status(200).json({
-            success: true,
-            data: users,
+        return responseHelper.success(res, {
+            users,
             pagination: {
                 limit: filter.limit,
                 offset: filter.offset
@@ -207,13 +186,10 @@ export const usersController = {
         const user = await usersService.getUserById(id)
 
         if (!user) {
-            throw new AppError('User not found', 404)
+            return responseHelper.notFound(res, 'User not found')
         }
 
-        res.status(200).json({
-            success: true,
-            data: user
-        })
+        return responseHelper.success(res, user)
     },
 
     // Toggle user active status (admin)
@@ -223,13 +199,13 @@ export const usersController = {
         try {
             const user = await usersService.toggleUserStatus(id)
 
-            res.status(200).json({
-                success: true,
-                data: user,
-                message: `User ${user.isActive ? 'activated' : 'deactivated'} successfully`
-            })
+            return responseHelper.success(
+                res,
+                user,
+                `User ${user.isActive ? 'activated' : 'deactivated'} successfully`
+            )
         } catch (error: any) {
-            throw new AppError(error.message, 400)
+            return responseHelper.badRequest(res, error.message)
         }
     },
 
@@ -238,19 +214,16 @@ export const usersController = {
         const userId = req.user?.id
 
         if (!userId) {
-            throw new AppError('User not authenticated', 401)
+            return responseHelper.unauthorized(res, 'User not authenticated')
         }
 
         const guideProfile = await usersService.getGuideProfile(userId)
 
         if (!guideProfile) {
-            throw new AppError('Guide profile not found', 404)
+            return responseHelper.notFound(res, 'Guide profile not found')
         }
 
-        res.status(200).json({
-            success: true,
-            data: guideProfile
-        })
+        return responseHelper.success(res, guideProfile)
     },
 
     // Get admin dashboard
@@ -258,19 +231,16 @@ export const usersController = {
         const userId = req.user?.id
 
         if (!userId) {
-            throw new AppError('User not authenticated', 401)
+            return responseHelper.unauthorized(res, 'User not authenticated')
         }
 
         const dashboardData = await usersService.getAdminDashboard(userId)
 
         if (!dashboardData) {
-            throw new AppError('Admin profile not found', 404)
+            return responseHelper.notFound(res, 'Admin profile not found')
         }
 
-        res.status(200).json({
-            success: true,
-            data: dashboardData
-        })
+        return responseHelper.success(res, dashboardData)
     },
 
     // Get guide tours
@@ -278,16 +248,13 @@ export const usersController = {
         const userId = req.user?.id
 
         if (!userId) {
-            throw new AppError('User not authenticated', 401)
+            return responseHelper.unauthorized(res, 'User not authenticated')
         }
 
         try {
-            // const tours = await reservationsService.getGuideTours(userId)
+            const tours = await reservationsService.getGuideTours(userId)
 
-            res.status(200).json({
-                success: true,
-                data: "tours"
-            })
+            return responseHelper.success(res, tours)
         } catch (error: any) {
             throw error
         }

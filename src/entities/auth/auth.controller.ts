@@ -2,6 +2,7 @@
 import { Request, Response } from 'express'
 import { authService } from './auth.service'
 import { AppError } from '../../shared/middleware/error.middleware'
+import { responseHelper as response } from '../../shared/utils/response'
 import {
   RegisterDto,
   LoginDto,
@@ -45,11 +46,7 @@ export const authController = {
         address
       })
 
-      res.status(201).json({
-        success: true,
-        data: result,
-        message: 'User registered successfully'
-      })
+      return response.created(res, result, 'User registered successfully')
     } catch (error: any) {
       throw new AppError(error.message, error.statusCode || 400)
     }
@@ -66,12 +63,7 @@ export const authController = {
 
     try {
       const result = await authService.login({ email, password })
-
-      res.status(200).json({
-        success: true,
-        data: result,
-        message: 'Login successful'
-      })
+      return response.success(res, result, 'Login successful')
     } catch (error: any) {
       throw new AppError(error.message, error.statusCode || 401)
     }
@@ -82,16 +74,12 @@ export const authController = {
     const userId = req.user?.id
 
     if (!userId) {
-      throw new AppError('Authentication required', 401)
+      return response.unauthorized(res, 'Authentication required')
     }
 
     try {
       const user = await authService.getCurrentUser(userId)
-
-      res.status(200).json({
-        success: true,
-        data: user
-      })
+      return response.success(res, user)
     } catch (error: any) {
       throw new AppError(error.message, error.statusCode || 400)
     }
@@ -102,18 +90,18 @@ export const authController = {
     const userId = req.user?.id
 
     if (!userId) {
-      throw new AppError('Authentication required', 401)
+      return response.unauthorized(res, 'Authentication required')
     }
 
     const { currentPassword, newPassword }: UpdatePasswordDto = req.body
 
     // Validate input
     if (!currentPassword || !newPassword) {
-      throw new AppError('Current password and new password are required', 400)
+      return response.badRequest(res, 'Current password and new password are required')
     }
 
     if (!validatePassword(newPassword)) {
-      throw new AppError('New password must be at least 8 characters', 400)
+      return response.badRequest(res, 'New password must be at least 8 characters')
     }
 
     try {
@@ -122,11 +110,11 @@ export const authController = {
         newPassword
       })
 
-      res.status(200).json({
-        success: true,
-        message: 'Password updated successfully'
-      })
+      return response.success(res, null, 'Password updated successfully')
     } catch (error: any) {
+      if (error.message === 'Current password is incorrect') {
+        return response.badRequest(res, error.message)
+      }
       throw new AppError(error.message, error.statusCode || 400)
     }
   },
@@ -137,9 +125,6 @@ export const authController = {
     // without implementing a token blacklist or using short-lived tokens with refresh tokens
 
     // For now, just return success and let the client delete the token
-    res.status(200).json({
-      success: true,
-      message: 'Logged out successfully'
-    })
+    return response.success(res, null, 'Logged out successfully')
   }
 }
