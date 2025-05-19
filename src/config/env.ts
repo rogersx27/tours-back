@@ -17,7 +17,7 @@ const config = {
 }
 
 // Validate required environment variables
-const requiredEnvVars = ['DATABASE_URL', 'JWT_SECRET', 'AVALANCHE_RPC_URL']
+const requiredEnvVars = ['DATABASE_URL', 'JWT_SECRET']
 
 requiredEnvVars.forEach(varName => {
   if (!process.env[varName]) {
