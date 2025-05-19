@@ -8,7 +8,7 @@ git push
 echo "deploying api in caprover"
 
 # escoge la app que quieres desplegar
-apps=("tours-back")
+apps=("tours-backend")
 echo "Lista de apps:"
 
 # Mostrar la lista de aplicaciones con números
