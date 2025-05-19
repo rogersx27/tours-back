@@ -1,0 +1,159 @@
+// This is a Prisma schema file,
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// Tour model represents tours offered by the company
+model Tour {
+    id              String          @id @default(uuid())
+    name            String
+    description     String          @db.Text
+    duration        String
+    durationMinutes Int
+    image           String?
+    isActive        Boolean         @default(true)
+    createdAt       DateTime        @default(now())
+    updatedAt       DateTime        @updatedAt
+    categoryId      String
+    category        Category        @relation(fields: [categoryId], references: [id])
+    inclusions      TourInclusion[]
+    prices          TourPrice[]
+    reservations    Reservation[]
+}
+
+// Category model represents different types of tours (gastronomic, adventure, etc.)
+model Category {
+    id        String   @id @default(uuid())
+    name      String   @unique
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    tours     Tour[]
+}
+
+// Inclusion model represents items included in tours
+model Inclusion {
+    id            String          @id @default(uuid())
+    name          String          @unique
+    icon          String?
+    createdAt     DateTime        @default(now())
+    updatedAt     DateTime        @updatedAt
+    tourInclusion TourInclusion[]
+}
+
+// Junction table between Tour and Inclusion
+model TourInclusion {
+    id          String    @id @default(uuid())
+    tourId      String
+    inclusionId String
+    tour        Tour      @relation(fields: [tourId], references: [id], onDelete: Cascade)
+    inclusion   Inclusion @relation(fields: [inclusionId], references: [id], onDelete: Cascade)
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    @@unique([tourId, inclusionId])
+}
+
+// PriceRange represents different price categories based on number of people
+model PriceRange {
+    id        String      @id @default(uuid())
+    name      String      @unique
+    minPeople Int
+    maxPeople Int?
+    createdAt DateTime    @default(now())
+    updatedAt DateTime    @updatedAt
+    prices    TourPrice[]
+}
+
+// TourPrice connects tours with price ranges
+model TourPrice {
+    id           String     @id @default(uuid())
+    tourId       String
+    priceRangeId String
+    price        Decimal    @db.Decimal(10, 2)
+    tour         Tour       @relation(fields: [tourId], references: [id], onDelete: Cascade)
+    priceRange   PriceRange @relation(fields: [priceRangeId], references: [id])
+    createdAt    DateTime   @default(now())
+    updatedAt    DateTime   @updatedAt
+
+    @@unique([tourId, priceRangeId])
+}
+
+// User model for customers, admins, guides
+model User {
+    id           String        @id @default(uuid())
+    email        String        @unique
+    name         String
+    password     String
+    phone        String?
+    address      String?
+    role         Role          @default(CUSTOMER)
+    isActive     Boolean       @default(true)
+    createdAt    DateTime      @default(now())
+    updatedAt    DateTime      @updatedAt
+    reservations Reservation[]
+    guideTours   Reservation[] @relation("GuideReservation")
+}
+
+// Role enum for user roles
+enum Role {
+    ADMIN
+    GUIDE
+    CUSTOMER
+}
+
+// Status enum for reservation status
+enum ReservationStatus {
+    PENDING
+    CONFIRMED
+    CANCELLED
+    COMPLETED
+}
+
+// Payment status enum
+enum PaymentStatus {
+    PENDING
+    PAID
+    REFUNDED
+    CANCELLED
+}
+
+// Reservation model for tour bookings
+model Reservation {
+    id              String            @id @default(uuid())
+    tourId          String
+    userId          String
+    guideId         String?
+    reservationDate DateTime
+    peopleCount     Int
+    totalPrice      Decimal           @db.Decimal(10, 2)
+    status          ReservationStatus @default(PENDING)
+    paymentStatus   PaymentStatus     @default(PENDING)
+    notes           String?
+    createdAt       DateTime          @default(now())
+    updatedAt       DateTime          @updatedAt
+    tour            Tour              @relation(fields: [tourId], references: [id])
+    user            User              @relation(fields: [userId], references: [id])
+    guide           User?             @relation("GuideReservation", fields: [guideId], references: [id])
+    payments        Payment[]
+}
+
+// Payment model for tracking payments
+model Payment {
+    id            String        @id @default(uuid())
+    reservationId String
+    amount        Decimal       @db.Decimal(10, 2)
+    paymentMethod String
+    transactionId String?
+    status        PaymentStatus
+    paidAt        DateTime?
+    createdAt     DateTime      @default(now())
+    updatedAt     DateTime      @updatedAt
+    reservation   Reservation   @relation(fields: [reservationId], references: [id])
+}

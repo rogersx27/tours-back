@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour System Auth Testing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .auth-container {
+            display: flex;
+            gap: 20px;
+        }
+        .auth-box {
+            flex: 1;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        h2 {
+            margin-top: 0;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+            color: #4CAF50;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .response-container {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .response-title {
+            font-weight: bold;
+            margin: 0;
+        }
+        .clear-btn {
+            background-color: #f44336;
+            padding: 5px 10px;
+            font-size: 14px;
+        }
+        pre {
+            background-color: #333;
+            color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 0;
+        }
+        .error {
+            color: red;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        .success {
+            color: green;
+            margin-top: 5px;
+            font-size: 14px;
+        }
+        .token-container {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            border-radius: 5px;
+        }
+        .token-text {
+            font-size: 14px;
+            word-break: break-all;
+        }
+        .protected-actions {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .action-btn {
+            flex: 1;
+        }
+        .action-btn.secondary {
+            background-color: #2196F3;
+        }
+        .action-btn.secondary:hover {
+            background-color: #0b7dda;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #ddd;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tour Booking System - Authentication Testing</h1>
+        
+        <!-- Auth Forms -->
+        <div class="auth-container">
+            <!-- Registration Form -->
+            <div class="auth-box">
+                <h2>Register User</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="regEmail">Email *</label>
+                        <input type="email" id="regEmail" required placeholder="Enter email">
+                        <div class="error" id="regEmailError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="regName">Full Name *</label>
+                        <input type="text" id="regName" required placeholder="Enter full name">
+                        <div class="error" id="regNameError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="regPassword">Password *</label>
+                        <input type="password" id="regPassword" required placeholder="Minimum 8 characters">
+                        <div class="error" id="regPasswordError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="regPhone">Phone Number</label>
+                        <input type="text" id="regPhone" placeholder="Optional">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="regAddress">Address</label>
+                        <input type="text" id="regAddress" placeholder="Optional">
+                    </div>
+                    
+                    <button type="submit">Register</button>
+                    <div class="success" id="registerSuccess"></div>
+                </form>
+            </div>
+            
+            <!-- Login Form -->
+            <div class="auth-box">
+                <h2>Login</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email *</label>
+                        <input type="email" id="loginEmail" required placeholder="Enter email">
+                        <div class="error" id="loginEmailError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="loginPassword">Password *</label>
+                        <input type="password" id="loginPassword" required placeholder="Enter password">
+                        <div class="error" id="loginPasswordError"></div>
+                    </div>
+                    
+                    <button type="submit">Login</button>
+                    <div class="success" id="loginSuccess"></div>
+                </form>
+                
+                <!-- Current Session Token -->
+                <div class="token-container" id="tokenContainer" style="display: none;">
+                    <h3>Current Session</h3>
+                    <p>User is currently logged in.</p>
+                    <p><strong>User:</strong> <span id="currentUserInfo"></span></p>
+                    <p><strong>Token:</strong></p>
+                    <div class="token-text" id="currentToken"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Protected Actions -->
+        <div class="protected-actions" id="protectedActions" style="display: none;">
+            <h2>Protected Actions (Requires Authentication)</h2>
+            <p>Test authenticated endpoints after logging in.</p>
+            
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('profile')">Get Profile</div>
+                <div class="tab" onclick="switchTab('password')">Change Password</div>
+                <div class="tab" onclick="switchTab('logout')">Logout</div>
+            </div>
+            
+            <div id="profileTab" class="tab-content">
+                <p>Get current user profile information.</p>
+                <button class="action-btn secondary" onclick="getCurrentUser()">Get Profile</button>
+            </div>
+            
+            <div id="passwordTab" class="tab-content" style="display: none;">
+                <div class="form-group">
+                    <label for="currentPassword">Current Password *</label>
+                    <input type="password" id="currentPassword" required placeholder="Enter current password">
+                </div>
+                
+                <div class="form-group">
+                    <label for="newPassword">New Password *</label>
+                    <input type="password" id="newPassword" required placeholder="Minimum 8 characters">
+                    <div class="error" id="newPasswordError"></div>
+                </div>
+                
+                <button class="action-btn secondary" onclick="changePassword()">Change Password</button>
+            </div>
+            
+            <div id="logoutTab" class="tab-content" style="display: none;">
+                <p>End the current user session.</p>
+                <button class="action-btn secondary" onclick="logout()">Logout</button>
+            </div>
+        </div>
+        
+        <!-- API Response -->
+        <div class="response-container">
+            <div class="response-header">
+                <h3 class="response-title">API Response</h3>
+                <button class="clear-btn" onclick="clearResponse()">Clear</button>
+            </div>
+            <pre id="responseOutput">// API responses will appear here</pre>
+        </div>
+    </div>
+    
+    <script>
+        // API Base URL - CHANGE THIS TO YOUR API URL
+        const API_URL = 'http://localhost:3000/api';
+        
+        // Current authorization token
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+        
+        // Check if user is logged in on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthUI();
+        });
+        
+        // Register form submit
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // Clear previous errors
+            clearErrors();
+            
+            // Get form values
+            const email = document.getElementById('regEmail').value;
+            const name = document.getElementById('regName').value;
+            const password = document.getElementById('regPassword').value;
+            const phone = document.getElementById('regPhone').value;
+            const address = document.getElementById('regAddress').value;
+            
+            // Validate
+            let hasErrors = false;
+            
+            if (!validateEmail(email)) {
+                document.getElementById('regEmailError').textContent = 'Please enter a valid email address';
+                hasErrors = true;
+            }
+            
+            if (name.trim().length < 2) {
+                document.getElementById('regNameError').textContent = 'Name must be at least 2 characters';
+                hasErrors = true;
+            }
+            
+            if (password.length < 8) {
+                document.getElementById('regPasswordError').textContent = 'Password must be at least 8 characters';
+                hasErrors = true;
+            }
+            
+            if (hasErrors) return;
+            
+            // Prepare request data
+            const registerData = {
+                email: email,
+                name: name,
+                password: password
+            };
+            
+            // Add optional fields if provided
+            if (phone) registerData.phone = phone;
+            if (address) registerData.address = address;
+            
+            // Send API request
+            fetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(registerData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayResponse(data);
+                
+                if (data.success) {
+                    document.getElementById('registerSuccess').textContent = 'Registration successful! You can now log in.';
+                    document.getElementById('registerForm').reset();
+                }
+            })
+            .catch(error => {
+                displayResponse({error: error.message});
+            });
+        });
+        
+        // Login form submit
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // Clear previous errors
+            clearErrors();
+            
+            // Get form values
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Validate
+            let hasErrors = false;
+            
+            if (!validateEmail(email)) {
+                document.getElementById('loginEmailError').textContent = 'Please enter a valid email address';
+                hasErrors = true;
+            }
+            
+            if (password.trim() === '') {
+                document.getElementById('loginPasswordError').textContent = 'Password is required';
+                hasErrors = true;
+            }
+            
+            if (hasErrors) return;
+            
+            // Prepare request data
+            const loginData = {
+                email: email,
+                password: password
+            };
+            
+            // Send API request
+            fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(loginData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayResponse(data);
+                
+                if (data.success && data.data.token) {
+                    // Save token and user info
+                    authToken = data.data.token;
+                    currentUser = data.data.user;
+                    
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    document.getElementById('loginSuccess').textContent = 'Login successful!';
+                    document.getElementById('loginForm').reset();
+                    
+                    updateAuthUI();
+                }
+            })
+            .catch(error => {
+                displayResponse({error: error.message});
+            });
+        });
+        
+        // Get current user profile
+        function getCurrentUser() {
+            if (!authToken) {
+                displayResponse({error: 'No authentication token. Please login first.'});
+                return;
+            }
+            
+            fetch(`${API_URL}/auth/me`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayResponse(data);
+            })
+            .catch(error => {
+                displayResponse({error: error.message});
+            });
+        }
+        
+        // Change password
+        function changePassword() {
+            if (!authToken) {
+                displayResponse({error: 'No authentication token. Please login first.'});
+                return;
+            }
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            
+            // Validate
+            if (newPassword.length < 8) {
+                document.getElementById('newPasswordError').textContent = 'New password must be at least 8 characters';
+                return;
+            }
+            
+            // Prepare request data
+            const passwordData = {
+                currentPassword: currentPassword,
+                newPassword: newPassword
+            };
+            
+            fetch(`${API_URL}/auth/change-password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(passwordData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayResponse(data);
+                
+                if (data.success) {
+                    document.getElementById('currentPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                }
+            })
+            .catch(error => {
+                displayResponse({error: error.message});
+            });
+        }
+        
+        // Logout
+        function logout() {
+            if (!authToken) {
+                displayResponse({error: 'No authentication token. Please login first.'});
+                return;
+            }
+            
+            fetch(`${API_URL}/auth/logout`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayResponse(data);
+                
+                if (data.success) {
+                    // Clear token and user info
+                    authToken = null;
+                    currentUser = null;
+                    
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('currentUser');
+                    
+                    updateAuthUI();
+                }
+            })
+            .catch(error => {
+                displayResponse({error: error.message});
+            });
+        }
+        
+        // Display API response
+        function displayResponse(data) {
+            const output = document.getElementById('responseOutput');
+            output.textContent = JSON.stringify(data, null, 2);
+        }
+        
+        // Clear response output
+        function clearResponse() {
+            document.getElementById('responseOutput').textContent = '// API responses will appear here';
+        }
+        
+        // Clear all error messages
+        function clearErrors() {
+            const errorElements = document.querySelectorAll('.error');
+            errorElements.forEach(element => {
+                element.textContent = '';
+            });
+            
+            const successElements = document.querySelectorAll('.success');
+            successElements.forEach(element => {
+                element.textContent = '';
+            });
+        }
+        
+        // Update UI based on authentication state
+        function updateAuthUI() {
+            const tokenContainer = document.getElementById('tokenContainer');
+            const protectedActions = document.getElementById('protectedActions');
+            
+            if (authToken && currentUser) {
+                // User is logged in
+                tokenContainer.style.display = 'block';
+                protectedActions.style.display = 'block';
+                
+                document.getElementById('currentToken').textContent = authToken;
+                document.getElementById('currentUserInfo').textContent = 
+                    `${currentUser.name} (${currentUser.email}) - Role: ${currentUser.role}`;
+            } else {
+                // User is logged out
+                tokenContainer.style.display = 'none';
+                protectedActions.style.display = 'none';
+            }
+        }
+        
+        // Switch tabs in protected actions
+        function switchTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(`${tabName}Tab`).style.display = 'block';
+            
+            // Set active class on selected tab
+            event.target.classList.add('active');
+        }
+        
+        // Validate email format
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(String(email).toLowerCase());
+        }
+    </script>
+</body>
+</html>
