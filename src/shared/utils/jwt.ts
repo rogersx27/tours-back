@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken'
 import config from '../../config/env'
-import { AppError } from '../middleware/error.middleware'
+import { AppError } from '../../shared/middleware/error.middleware'
 import { JWTPayload } from '../../entities/auth/auth.types'
 
 // Utilidad para manejar tokens JWT
