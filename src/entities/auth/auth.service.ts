@@ -1,8 +1,6 @@
 // src/entities/auth/auth.service.ts
 import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
 import { prisma } from '../../lib/prisma'
-import config from '../../config/env'
 import { AppError } from '../../shared/middleware/error.middleware'
 import { Role, User } from '@prisma/client'
 import {
@@ -13,22 +11,17 @@ import {
     JWTPayload,
     UpdatePasswordDto
 } from './auth.types'
+import { jwtUtils } from '../../shared/utils/jwt'
 
 export const authService = {
     // Generate JWT token
     generateToken(payload: Omit<JWTPayload, 'iat' | 'exp'>): string {
-        return jwt.sign(payload, config.JWT_SECRET, {
-            expiresIn: config.JWT_EXPIRES_IN,
-        })
+        return jwtUtils.sign(payload)
     },
 
     // Verify JWT token
     verifyToken(token: string): JWTPayload {
-        try {
-            return jwt.verify(token, config.JWT_SECRET) as JWTPayload
-        } catch (error) {
-            throw new AppError('Invalid or expired token', 401)
-        }
+        return jwtUtils.verify(token)
     },
 
     // Register new user
