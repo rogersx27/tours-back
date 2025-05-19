@@ -4,6 +4,9 @@ FROM oven/bun:latest
 # Set working directory
 WORKDIR /app
 
+# Install OpenSSL - add this new step
+RUN apt-get update -y && apt-get install -y openssl
+
 # Copy package files first for better caching
 COPY package.json tsconfig.json ./
 COPY prisma ./prisma
