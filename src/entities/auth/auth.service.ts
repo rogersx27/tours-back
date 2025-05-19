@@ -12,7 +12,6 @@ import {
     JWTPayload,
     UpdatePasswordDto
 } from './auth.types'
-import { jwtUtils } from '../../shared/utils/jwt'
 import config from '../../config/env'
 
 export const authService = {
